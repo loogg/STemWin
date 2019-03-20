@@ -1,0 +1,19 @@
+from building import *
+
+cwd     = GetCurrentDir()
+src     = Glob('*.c')
+CPPPATH = []
+
+LIBPATH = [cwd]
+LIBS = []
+if GetDepend(['ARCH_ARM_CORTEX_M4']):
+    LIBS += ['STemWin_CM4_OS_wc16_ot']
+    CPPPATH += [cwd + '/../inc/5.44']
+
+if GetDepend(['ARCH_ARM_CORTEX_M3']):
+    LIBS += ['STemWin532_CM3_OS_Keil']
+    CPPPATH += [cwd + '/../inc/5.32']
+
+group = DefineGroup('STemWin', src, depend = ['PKG_USING_STEMWIN'], CPPPATH = CPPPATH, LIBS = LIBS, LIBPATH=LIBPATH)
+
+Return('group')
