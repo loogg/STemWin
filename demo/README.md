@@ -25,6 +25,7 @@ struct rt_device_graphic_info
 };
 ```
 这些参数在设备注册或初始化的时候需要赋值。
+
 | 名称 | 说明 |
 | ---- | ---- |
 | pixel_format | 颜色格式 |
@@ -65,6 +66,7 @@ static rt_err_t drv_lcd_control(struct rt_device *device, int cmd, void *args)
     return RT_EOK;
 }
 ```
+
 | 名称 | 说明 |
 | ---- | ---- |
 | RTGRAPHIC_CTRL_RECT_UPDATE | 填充区域，填充函数由用户实现 |
