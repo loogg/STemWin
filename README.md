@@ -36,7 +36,7 @@ STemWin package 遵循 LGPLv2.1 许可，详见 `LICENSE` 文件。
 ```
 RT-Thread online packages
     multimedia packages --->
-        [*] STemWin: a gui engine package for rt-thread
+        [*] STemWin: a STemWin package for rt-thread
 ```
 
 然后让 RT-Thread 的包管理器自动更新，或者使用 `pkgs --update` 命令更新包到 BSP 中。
