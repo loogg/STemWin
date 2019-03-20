@@ -7,6 +7,7 @@
 #include <drv_log.h>
 
 _lcd_dev lcddev;
+SRAM_HandleTypeDef hsram1;
 
 #define LCD_BL GET_PIN(B, 15)
 #define LCD_BASE ((uint32_t)(0x6C000000 | 0x0000007E))
@@ -460,50 +461,57 @@ void LCD_Clear(uint32_t color)
     }
 }
 
-void LCD_Fill(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
+void LCD_HLine(const char *pixel, int x1, int x2, int y)
 {
-    uint16_t i, j;
-    for (i = 0; i <= height; i++)
-    {
-        LCD_SetCursor(x, y + i);    //设置光标位置
-        LCD_WriteRAM_Prepare(); //开始写入GRAM
-        for (j = 0; j < width; j++)
-            LCD->RAM = color; //显示颜色
-    }
+    int xsize = x2 - x1 + 1;
+    LCD_SetCursor(x1, y);
+    LCD_WriteRAM_Prepare();
+    uint16_t *p = (uint16_t *)pixel;
+    for (; xsize > 0; xsize--)
+        LCD->RAM = *p;
+}
+
+void LCD_BlitLine(const char *pixel, int x, int y, rt_size_t size)
+{
+    LCD_SetCursor(x, y);
+    LCD_WriteRAM_Prepare();
+    uint16_t *p = (uint16_t *)pixel;
+    for (; size > 0; size--, p++)
+        LCD->RAM = *p;
 }
 
 static rt_err_t drv_lcd_init(struct rt_device *device)
 {
+    
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOE_CLK_ENABLE();
     __HAL_RCC_GPIOF_CLK_ENABLE();
     __HAL_RCC_GPIOG_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    
+    FSMC_NORSRAM_TimingTypeDef Timing;
 
     rt_pin_mode(LCD_BL, PIN_MODE_OUTPUT);
 
-    SRAM_HandleTypeDef hsram;
-    FSMC_NORSRAM_TimingTypeDef Timing;
-
-    /** Perform the SRAM memory initialization sequence
+    /** Perform the SRAM1 memory initialization sequence
   */
-    hsram.Instance = FSMC_NORSRAM_DEVICE;
-    hsram.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
-    /* hsram.Init */
-    hsram.Init.NSBank = FSMC_NORSRAM_BANK4;
-    hsram.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;
-    hsram.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;
-    hsram.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
-    hsram.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;
-    hsram.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
-    hsram.Init.WrapMode = FSMC_WRAP_MODE_DISABLE;
-    hsram.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;
-    hsram.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;
-    hsram.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;
-    hsram.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;
-    hsram.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
-    hsram.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;
-    hsram.Init.PageSize = FSMC_PAGE_SIZE_NONE;
+    hsram1.Instance = FSMC_NORSRAM_DEVICE;
+    hsram1.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
+    /* hsram1.Init */
+    hsram1.Init.NSBank = FSMC_NORSRAM_BANK4;
+    hsram1.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;
+    hsram1.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;
+    hsram1.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
+    hsram1.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;
+    hsram1.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
+    hsram1.Init.WrapMode = FSMC_WRAP_MODE_DISABLE;
+    hsram1.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;
+    hsram1.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;
+    hsram1.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;
+    hsram1.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;
+    hsram1.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
+    hsram1.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;
+    hsram1.Init.PageSize = FSMC_PAGE_SIZE_NONE;
     /* Timing */
     Timing.AddressSetupTime = 5;
     Timing.AddressHoldTime = 1;
@@ -514,7 +522,7 @@ static rt_err_t drv_lcd_init(struct rt_device *device)
     Timing.AccessMode = FSMC_ACCESS_MODE_A;
     /* ExtTiming */
 
-    if (HAL_SRAM_Init(&hsram, &Timing, NULL) != HAL_OK)
+    if (HAL_SRAM_Init(&hsram1, &Timing, &Timing) != HAL_OK)
     {
         Error_Handler();
     }
@@ -1843,9 +1851,9 @@ struct rt_device_graphic_ops fsmc_lcd_ops =
     {
         LCD_Fast_DrawPoint,
         LCD_ReadPoint,
+        LCD_HLine,
         RT_NULL,
-        RT_NULL,
-        RT_NULL,
+        LCD_BlitLine,
 };
 
 static rt_err_t drv_lcd_control(struct rt_device *device, int cmd, void *args)
@@ -1853,14 +1861,6 @@ static rt_err_t drv_lcd_control(struct rt_device *device, int cmd, void *args)
     struct drv_lcd_device *lcd = LCD_DEVICE(device);
     switch (cmd)
     {
-    case RTGRAPHIC_CTRL_RECT_UPDATE:
-    {
-        struct rt_device_rect_info *info = (struct rt_device_rect_info *)args;
-        
-        //this function can be replaced by the customer
-        LCD_Fill(info->x, info->y, info->width, info->height, info->color);
-    }
-    break;
     case RTGRAPHIC_CTRL_GET_INFO:
     {
         struct rt_device_graphic_info *info = (struct rt_device_graphic_info *)args;

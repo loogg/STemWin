@@ -219,14 +219,11 @@ static void _FillRect(GUI_DEVICE *pDevice, int x0, int y0, int x1, int y1)
     LCD_PIXELINDEX PixelIndex;
 
     PixelIndex = LCD__GetColorIndex();
-
-    struct rt_device_rect_info info;
-    info.x = x0;
-    info.y = y0;
-    info.width = x1 - x0 + 1;
-    info.height = y1 - y0 + 1;
-    info.color = PixelIndex;
-    rt_device_control(lcd_device, RTGRAPHIC_CTRL_RECT_UPDATE, &info);
+    
+    for (; y0 <= y1; y0++)
+    {
+        rt_graphix_ops(lcd_device)->draw_hline((const char *)&PixelIndex, x0, x1, y0);
+    }
 }
 
 /*********************************************************************
@@ -543,10 +540,8 @@ static void _DrawBitLine8BPP(GUI_DEVICE *pDevice, int x, int y, U8 const GUI_UNI
 */
 static void _DrawBitLine16BPP(GUI_DEVICE *pDevice, int x, int y, U16 const GUI_UNI_PTR *p, int xsize)
 {
-    for (; xsize > 0; xsize--, x++, p++)
-    {
-        _SetPixelIndex(pDevice, x, y, *p);
-    }
+
+    rt_graphix_ops(lcd_device)->blit_line((const char *)p, x, y, xsize);
 }
 
 /*********************************************************************

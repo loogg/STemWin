@@ -40,14 +40,6 @@ static rt_err_t drv_lcd_control(struct rt_device *device, int cmd, void *args)
     struct drv_lcd_device *lcd = LCD_DEVICE(device);
     switch (cmd)
     {
-    case RTGRAPHIC_CTRL_RECT_UPDATE:
-    {
-        struct rt_device_rect_info *info = (struct rt_device_rect_info *)args;
-        
-        //this function can be replaced by the customer
-        LCD_Fill(info->x, info->y, info->width, info->height, info->color);
-    }
-    break;
     case RTGRAPHIC_CTRL_GET_INFO:
     {
         struct rt_device_graphic_info *info = (struct rt_device_graphic_info *)args;
@@ -92,9 +84,9 @@ struct rt_device_graphic_ops fsmc_lcd_ops =
     {
         LCD_Fast_DrawPoint,
         LCD_ReadPoint,
+        LCD_HLine,
         RT_NULL,
-        RT_NULL,
-        RT_NULL,
+        LCD_BlitLine,
 };
 ```
 
