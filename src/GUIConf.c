@@ -57,7 +57,7 @@ Purpose     : Display controller initialization
 //
 // Define the available number of bytes available for the GUI
 //
-#define GUI_NUMBYTES (60 * 1024)
+#define GUI_NUMBYTES (PKG_STEMWIN_MEM_SIZE * 1024)
 
 /* Define the average block size */
 #define GUI_BLOCKSIZE 0x80
