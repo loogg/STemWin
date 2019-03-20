@@ -61,6 +61,25 @@ RT-Thread online packages
 
 - LCD驱动示例位于[`/demo`](/demo) 下，示例使用并口LCD，通过FSMC接口进行操作。编写LCD驱动前 **务必查看**。
 
+- 目前只支持如下颜色格式：
+```
+    switch(info.pixel_format)
+    {
+        case RTGRAPHIC_PIXEL_FORMAT_MONO:
+            color = GUICC_1;
+            break;
+        case RTGRAPHIC_PIXEL_FORMAT_RGB565:
+            color = GUICC_M565;
+            break;
+        case RTGRAPHIC_PIXEL_FORMAT_RGB888:
+            color = GUICC_M888;
+            break;
+        default:
+            color = GUICC_M565;
+            break;
+    }
+```
+
 ## 5、联系方式 & 感谢
 
 * 维护：malongwei
