@@ -78,6 +78,13 @@ struct rt_device_graphic_ops
 };
 ```
 
+```
+void (*set_pixel) (const char *pixel, int x, int y);
+void (*get_pixel) (char *pixel, int x, int y);
+```
+
+这两个回调函数必须设置，其余三个函数是为了优化性能提供。
+
 将LCD操作函数填入，如下：
 ```
 struct rt_device_graphic_ops fsmc_lcd_ops =

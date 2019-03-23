@@ -217,12 +217,39 @@ static void _XorPixel(GUI_DEVICE *pDevice, int x, int y)
 static void _FillRect(GUI_DEVICE *pDevice, int x0, int y0, int x1, int y1)
 {
     LCD_PIXELINDEX PixelIndex;
+    int x;
 
     PixelIndex = LCD__GetColorIndex();
-    
-    for (; y0 <= y1; y0++)
+    if (GUI_pContext->DrawMode & LCD_DRAWMODE_XOR)
     {
-        rt_graphix_ops(lcd_device)->draw_hline((const char *)&PixelIndex, x0, x1, y0);
+        for (; y0 <= y1; y0++)
+        {
+            for (x = x0; x <= x1; x++)
+            {
+                _XorPixel(pDevice, x, y0);
+            }
+        }
+    }
+    else
+    {
+        if (rt_graphix_ops(lcd_device)->draw_hline != RT_NULL)
+        {
+            for (; y0 <= y1; y0++)
+            {
+                rt_graphix_ops(lcd_device)->draw_hline((const char *)&PixelIndex, x0, x1, y0);
+            }
+        }
+        else
+        {
+
+            for (; y0 <= y1; y0++)
+            {
+                for (x = x0; x <= x1; x++)
+                {
+                    _SetPixelIndex(pDevice, x, y0, PixelIndex);
+                }
+            }
+        }
     }
 }
 
@@ -540,8 +567,17 @@ static void _DrawBitLine8BPP(GUI_DEVICE *pDevice, int x, int y, U8 const GUI_UNI
 */
 static void _DrawBitLine16BPP(GUI_DEVICE *pDevice, int x, int y, U16 const GUI_UNI_PTR *p, int xsize)
 {
-
-    rt_graphix_ops(lcd_device)->blit_line((const char *)p, x, y, xsize);
+    if (rt_graphix_ops(lcd_device)->blit_line != RT_NULL)
+    {
+        rt_graphix_ops(lcd_device)->blit_line((const char *)p, x, y, xsize);
+    }
+    else
+    {
+        for (; xsize > 0; xsize--, x++, p++)
+        {
+            _SetPixelIndex(pDevice, x, y, *p);
+        }
+    }
 }
 
 /*********************************************************************
