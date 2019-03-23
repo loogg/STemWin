@@ -7,7 +7,7 @@ emWin 设计用于提供高效且独立于处理器和显示控制器的图形�
 STemWin 是 SEGGER 公司授权给 ST（意法半导体）的。使用 ST 芯片的用户可以免费使用 STemWin。
 
 本源码实现了在RT-Thread上的移植。源码地址：
-[https://github.com/loogg/STemWin](https://github.com/loogg/STemWin)  作者：[loogg](https://github.com/loogg)
+<https://github.com/loogg/STemWin>  作者：[loogg](https://github.com/loogg)
 
 ### 1.1 目录结构
 
@@ -83,4 +83,5 @@ RT-Thread online packages
 ## 5、联系方式 & 感谢
 
 * 维护：malongwei
-* 主页：https://github.com/loogg/STemWin
+* 主页：<https://github.com/loogg/STemWin>
+* 邮箱：<2544047213@qq.com>
