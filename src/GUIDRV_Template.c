@@ -733,7 +733,30 @@ static void *_GetDevData(GUI_DEVICE *pDevice, int Index)
     switch (Index)
     {
     case LCD_DEVDATA_MEMDEV:
-        return (void *)&GUI_MEMDEV_DEVICE_16; // TBD: Has to be adapted to the right memory device depending on the used color depth!
+        {
+            struct rt_device_graphic_info info;
+            void *ptr = RT_NULL;
+            rt_device_control(lcd_device, RTGRAPHIC_CTRL_GET_INFO, &info);
+            switch(info.bits_per_pixel)
+            {
+                case 1:
+                    ptr = (void *)&GUI_MEMDEV_DEVICE_1;
+                    break;
+                case 8:
+                    ptr = (void *)&GUI_MEMDEV_DEVICE_8;
+                    break;
+                case 16:
+                    ptr = (void *)&GUI_MEMDEV_DEVICE_16;
+                    break;
+                case 32:
+                    ptr = (void *)&GUI_MEMDEV_DEVICE_32;
+                    break;
+                default:
+                    ptr = (void *)&GUI_MEMDEV_DEVICE_16;
+                    break;
+            }
+            return ptr; // TBD: Has to be adapted to the right memory device depending on the used color depth!
+        }
     }
 #else
     GUI_USE_PARA(Index);
