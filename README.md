@@ -59,7 +59,7 @@ RT-Thread online packages
 
 - STemWin软件包通过lcd设备进行画点、读点等操作，确保LCD驱动已经注册进设备。
 
-- LCD驱动示例位于[`/demo`](/demo) 下，示例使用并口LCD，通过FSMC接口进行操作。编写LCD驱动前 **务必查看**。
+- LCD驱动示例位于[`/demo`](/demo) 下，示例使用并口LCD和u8g2 OLED。编写LCD驱动前 **务必查看**。
 
 - 目前只支持如下颜色格式：
 ```

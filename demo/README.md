@@ -61,7 +61,6 @@ static rt_err_t drv_lcd_control(struct rt_device *device, int cmd, void *args)
 
 | 名称 | 说明 |
 | ---- | ---- |
-| RTGRAPHIC_CTRL_RECT_UPDATE | 填充区域，填充函数由用户实现 |
 | RTGRAPHIC_CTRL_GET_INFO  | 读取参数，参数信息由用户实现 |
 
 对LCD操作函数通过如下结构体实现：
